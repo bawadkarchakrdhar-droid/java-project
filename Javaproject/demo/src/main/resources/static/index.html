@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskPro | Colorful Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        body { 
+            background: linear-gradient(45deg, #0f0c29, #302b63, #24243e); 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+        }
+        
+        .card { 
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
+            padding: 40px; 
+            border-radius: 30px; 
+            box-shadow: 0 20px 60px rgba(0, 198, 255, 0.3); 
+            width: 100%; 
+            max-width: 480px; 
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        h2 { 
+            color: #fff; 
+            margin-bottom: 25px; 
+            font-weight: 600; 
+            text-align: center; 
+            font-size: 2rem;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+        }
+        
+        .input-group { display: flex; gap: 12px; margin-bottom: 30px; }
+        
+        input { 
+            flex: 1; 
+            padding: 15px; 
+            border: none; 
+            border-radius: 15px; 
+            outline: none; 
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .add-btn { 
+            background: linear-gradient(to right, #00c6ff, #0072ff); 
+            color: white; 
+            border: none; 
+            padding: 15px 25px; 
+            border-radius: 15px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: 0.4s;
+            box-shadow: 0 4px 15px rgba(0, 198, 255, 0.4);
+        }
+        
+        .add-btn:hover { 
+            transform: translateY(-3px) scale(1.05); 
+            box-shadow: 0 6px 20px rgba(0, 198, 255, 0.6);
+        }
+
+        .task-container { max-height: 350px; overflow-y: auto; padding-right: 8px; }
+        .task-container::-webkit-scrollbar { width: 6px; }
+        .task-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+        ul { list-style: none; }
+        
+        li { 
+            background: rgba(255, 255, 255, 0.1); 
+            margin-bottom: 15px; 
+            padding: 18px; 
+            border-radius: 18px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            transition: 0.3s; 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            animation: slideIn 0.4s ease forwards;
+        }
+
+        li:nth-child(odd) { border-left: 6px solid #00c6ff; }
+        li:nth-child(even) { border-left: 6px solid #f093fb; }
+
+        li:hover { 
+            background: rgba(255, 255, 255, 0.2); 
+            transform: translateX(5px);
+        }
+
+        .delete-btn { 
+            background: #ff4757; 
+            color: white; 
+            border: none; 
+            width: 35px; 
+            height: 35px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-btn:hover { background: #ff6b81; transform: rotate(90deg); }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>TaskPro Manager</h2>
+    
+    <div class="input-group">
+        <input type="text" id="taskInput" placeholder="Enter your colorful task...">
+        <button class="add-btn" onclick="addTask()">Add Task</button>
+    </div>
+
+    <div class="task-container">
+        <ul id="taskList"></ul>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:8080/api/tasks';
+
+    async function loadTasks() {
+        try {
+            const response = await fetch(API_URL);
+            const tasks = await response.json();
+            const list = document.getElementById('taskList');
+            list.innerHTML = ''; 
+            tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${task.name}</span>
+                    <button class="delete-btn" onclick="deleteTask('${task.id}')">✕</button>
+                `;
+                list.appendChild(li);
+            });
+        } catch (e) { console.error("Database connection issue!"); }
+    }
+
+    async function addTask() {
+        const input = document.getElementById('taskInput');
+        if (!input.value.trim()) return;
+
+        await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: input.value, completed: false })
+        });
+        input.value = ''; 
+        loadTasks();
+    }
+
+    async function deleteTask(id) {
+        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        loadTasks();
+    }
+
+    window.onload = loadTasks;
+</script>
+
+</body>
+</html>
