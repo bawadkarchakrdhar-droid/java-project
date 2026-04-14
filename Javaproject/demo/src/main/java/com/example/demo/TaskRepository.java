@@ -1,9 +1,11 @@
-@CrossOrigin(origins = "*")
 package com.example.demo;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 @Repository
+@CrossOrigin(origins = "*") 
 public interface TaskRepository extends MongoRepository<Task, String> {
+    // Yahan agar koi custom query methods hain toh woh niche rehne dena
 }
