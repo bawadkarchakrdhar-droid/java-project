@@ -5,7 +5,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 @Repository
-@CrossOrigin(origins = "*") 
+@CrossOrigin(origins = "*")
 public interface TaskRepository extends MongoRepository<Task, String> {
-    // Yahan agar koi custom query methods hain toh woh niche rehne dena
 }
