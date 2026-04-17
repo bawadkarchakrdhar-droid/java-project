@@ -1,29 +1,30 @@
 package com.example.demo;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import java.util.List; // Iske bina 'List' red rahega
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/tasks")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*") // Ye sabse important line hai connection ke liye
 public class TaskController {
 
-    private final TaskRepository repository;
+    @Autowired
+    private TaskRepository repository;
 
-    public TaskController(TaskRepository repository) {
-        this.repository = repository;
-    }
-
+    // Saare tasks lene ke liye
     @GetMapping
     public List<Task> getAllTasks() {
         return repository.findAll();
     }
 
+    // Naya task save karne ke liye
     @PostMapping
-    public Task addTask(@RequestBody Task task) {
+    public Task createTask(@RequestBody Task task) {
         return repository.save(task);
     }
 
+    // Task delete karne ke liye
     @DeleteMapping("/{id}")
     public void deleteTask(@PathVariable String id) {
         repository.deleteById(id);

@@ -136,43 +136,67 @@
 </div>
 
 <script>
-    const API_URL = 'https://java-project-gw48.onrender.com/api/tasks';
+   const API_URL = 'https://java-project-gw48.onrender.com/api/tasks';
 
+    // 1. Database se tasks load karne ke liye
     async function loadTasks() {
         try {
             const response = await fetch(API_URL);
             const tasks = await response.json();
-            const list = document.getElementById('taskList');
-            list.innerHTML = ''; 
-            tasks.forEach(task => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <span>${task.name}</span>
-                    <button class="delete-btn" onclick="deleteTask('${task.id}')">✕</button>
-                `;
-                list.appendChild(li);
-            });
-        } catch (e) { console.error("Database connection issue!"); }
+            
+            // Check karna tumhari HTML mein task list ki id 'taskList' hai ya nahi
+            const taskList = document.getElementById('taskList'); 
+            if (taskList) {
+                taskList.innerHTML = ''; 
+                tasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.className = 'task-item'; // CSS style ke liye
+                    li.innerHTML = `
+                        <span>${task.title}</span>
+                        <button onclick="deleteTask('${task.id}')" class="delete-btn">Delete</button>
+                    `;
+                    taskList.appendChild(li);
+                });
+            }
+        } catch (error) {
+            console.error("Data load nahi ho raha:", error);
+        }
     }
 
+    // 2. Naya task add karne ke liye
     async function addTask() {
-        const input = document.getElementById('taskInput');
-        if (!input.value.trim()) return;
+        const input = document.querySelector('input[type="text"]');
+        const title = input.value;
 
-        await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: input.value, completed: false })
-        });
-        input.value = ''; 
-        loadTasks();
+        if (!title) return alert("Bhai, kuch likho toh sahi!");
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: title, completed: false })
+            });
+
+            if (response.ok) {
+                input.value = ''; // Input box saaf karo
+                loadTasks(); // List refresh karo
+            }
+        } catch (error) {
+            console.error("Task add karne mein error:", error);
+        }
     }
 
+    // 3. Task delete karne ke liye (Optional par kaam aayega)
     async function deleteTask(id) {
-        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-        loadTasks();
+        try {
+            await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            loadTasks();
+        } catch (error) {
+            console.error("Delete error:", error);
+        }
     }
 
+    // Page load hote hi data dikhao
     window.onload = loadTasks;
 </script>
 
