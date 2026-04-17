@@ -1,11 +1,11 @@
 package com.example.demo;
 
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
+import java.util.List; // Iske bina 'List' red rahega
 
 @RestController
 @RequestMapping("/api/tasks")
-@CrossOrigin(origins = "*") // Frontend connect karne ke liye zaroori hai
+@CrossOrigin(origins = "*")
 public class TaskController {
 
     private final TaskRepository repository;
@@ -14,19 +14,16 @@ public class TaskController {
         this.repository = repository;
     }
 
-    // Saare tasks dekhne ke liye
     @GetMapping
     public List<Task> getAllTasks() {
         return repository.findAll();
     }
 
-    // Naya task add karne ke liye
     @PostMapping
     public Task addTask(@RequestBody Task task) {
         return repository.save(task);
     }
 
-    // Task delete karne ke liye
     @DeleteMapping("/{id}")
     public void deleteTask(@PathVariable String id) {
         repository.deleteById(id);
