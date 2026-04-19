@@ -136,23 +136,27 @@
 </div>
 
 <script>
-   const API_URL = 'https://java-project-gw48.onrender.com/api/tasks';
+    const API_URL = 'https://java-project-gw48.onrender.com/api/tasks';
 
-    // 1. Database se tasks load karne ke liye
+    // 1. Database se tasks load karne ke liye (Date ke saath)
     async function loadTasks() {
         try {
             const response = await fetch(API_URL);
             const tasks = await response.json();
-            
-            // Check karna tumhari HTML mein task list ki id 'taskList' hai ya nahi
-            const taskList = document.getElementById('taskList'); 
+
+            const taskList = document.getElementById('taskList');
             if (taskList) {
-                taskList.innerHTML = ''; 
+                taskList.innerHTML = '';
                 tasks.forEach(task => {
                     const li = document.createElement('li');
                     li.className = 'task-item'; // CSS style ke liye
                     li.innerHTML = `
-                        <span>${task.title}</span>
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="font-size: 1.1rem; font-weight: bold;">${task.title}</span>
+                            <small style="color: #aeaeae; font-size: 0.8rem; margin-top: 4px;">
+                                📅 ${task.dateDay ? task.dateDay : 'No date'}
+                            </small>
+                        </div>
                         <button onclick="deleteTask('${task.id}')" class="delete-btn">Delete</button>
                     `;
                     taskList.appendChild(li);
@@ -163,18 +167,28 @@
         }
     }
 
-    // 2. Naya task add karne ke liye
+    // 2. Naya task add karne ke liye (Date/Day automatic nikalega)
     async function addTask() {
         const input = document.querySelector('input[type="text"]');
         const title = input.value;
 
         if (!title) return alert("Bhai, kuch likho toh sahi!");
 
+        // Aaj ki date aur day nikalne ka logic
+        const now = new Date();
+        const options = { weekday: 'long', day: 'numeric', month: 'long' };
+        const formattedDate = now.toLocaleDateString('en-US', options); 
+        // Example output: "Sunday, April 19"
+
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: title, completed: false })
+                body: JSON.stringify({ 
+                    title: title, 
+                    dateDay: formattedDate, // Naya field backend ke liye
+                    completed: false 
+                })
             });
 
             if (response.ok) {
@@ -186,7 +200,7 @@
         }
     }
 
-    // 3. Task delete karne ke liye (Optional par kaam aayega)
+    // 3. Task delete karne ke liye
     async function deleteTask(id) {
         try {
             await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
@@ -199,6 +213,7 @@
     // Page load hote hi data dikhao
     window.onload = loadTasks;
 </script>
+   
 
 </body>
 </html>
